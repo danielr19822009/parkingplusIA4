@@ -21,29 +21,55 @@ class RegistroModelo {
     return resultado.insertId;
   }
 
-  static async registrarSalida(id) {
-    const [resultado] = await pool.query(
-      'UPDATE registros_ingreso SET fecha_salida = CURRENT_TIMESTAMP, estado = ? WHERE id = ?',
-      ['Fuera', id]
+  static async registrarSalida(id, usuarioSalidaId) {
+    // 1. Obtener datos del ingreso
+    const [ingreso] = await pool.query('SELECT * FROM registros_ingreso WHERE id = ?', [id]);
+    if (!ingreso[0]) return 0;
+
+    const data = ingreso[0];
+    const now = new Date();
+    const fechaSalida = now.toISOString().split('T')[0] + ' ' + now.toTimeString().split(' ')[0];
+    const horaSalida = now.toTimeString().split(' ')[0];
+
+    // Calcular tiempo (opcional para visualización)
+    const fechaIn = new Date(data.fecha_ingreso);
+    const diff = Math.abs(now - fechaIn);
+    const mins = Math.floor(diff / (1000 * 60));
+    const tiempoTotal = `${Math.floor(mins / 60)}h ${mins % 60}m`;
+
+    // 2. Insertar en registros_salida
+    await pool.query(
+      `INSERT INTO registros_salida (
+        vehiculo_id, celda_id, registro_ingreso_id, fecha_salida, hora_salida, 
+        hora_ingreso, tiempo_total, usuario_salida, total_pagar
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        data.vehiculo_id, data.celda_id, data.id, fechaSalida, horaSalida,
+        data.hora_ingreso, tiempoTotal, usuarioSalidaId || data.usuario_ingreso, 0
+      ]
     );
+
+    // 3. Actualizar estado en registros_ingreso (en lugar de borrar para no romper la FK)
+    const [resultado] = await pool.query("UPDATE registros_ingreso SET estado = 'Fuera' WHERE id = ?", [id]);
     
-    // Obtener la celda para liberarla
-    const [registro] = await pool.query('SELECT CELDA_id FROM registros_ingreso WHERE id = ?', [id]);
-    if (registro[0]) {
-      await pool.query('UPDATE celdas SET estado = ? WHERE id = ?', ['Disponible', registro[0].CELDA_id]);
+    // 4. Liberar celda
+    if (data.celda_id) {
+      await pool.query("UPDATE celdas SET estado = 'Disponible' WHERE id = ?", [data.celda_id]);
     }
     
     return resultado.affectedRows;
   }
 
   static async obtenerActivos() {
-    // Si no hay columna estado, asumimos que los que están aquí están activos 
-    // (o podríamos hacer un LEFT JOIN con registros_salida WHERE rs.id IS NULL)
     const [filas] = await pool.query(`
-      SELECT r.*, v.placa, v.marca, v.modelo, v.color, c.numero as celda_numero
+      SELECT r.*, v.placa, v.marca, v.modelo, v.color, c.numero as celda_numero,
+      GROUP_CONCAT(n.descripcion ORDER BY n.created_at DESC SEPARATOR '|||') as todas_novedades
       FROM registros_ingreso r
       JOIN vehicles v ON r.vehiculo_id = v.id
       JOIN celdas c ON r.celda_id = c.id
+      LEFT JOIN novedades n ON v.id = n.vehiculo_id
+      WHERE r.estado = 'Dentro'
+      GROUP BY r.id
     `);
     return filas;
   }
@@ -54,7 +80,7 @@ class RegistroModelo {
       FROM registros_ingreso r
       JOIN vehicles v ON r.vehiculo_id = v.id
       JOIN celdas c ON r.celda_id = c.id
-      WHERE v.placa = ?
+      WHERE v.placa = ? AND r.estado = 'Dentro'
     `, [placa]);
     return filas[0];
   }
@@ -65,7 +91,7 @@ class RegistroModelo {
   }
 
   static async obtenerEstadisticas() {
-    const [[{ dentro }]] = await pool.query("SELECT COUNT(*) as dentro FROM registros_ingreso");
+    const [[{ dentro }]] = await pool.query("SELECT COUNT(*) as dentro FROM registros_ingreso WHERE estado = 'Dentro'");
     const [[{ fuera }]] = await pool.query("SELECT COUNT(*) as fuera FROM registros_salida");
     return { dentro, fuera };
   }

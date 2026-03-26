@@ -47,7 +47,7 @@ class RegistroControlador {
   static async registrarSalida(req, res) {
     try {
       const { id } = req.params;
-      const resultado = await RegistroModelo.registrarSalida(id);
+      const resultado = await RegistroModelo.registrarSalida(id, req.usuario.id);
       if (resultado === 0) {
         return res.status(404).json({ mensaje: 'Registro no encontrado o ya salió' });
       }

@@ -1,5 +1,6 @@
 :root {
   --primary: #1e40af;
+  --primary-rgb: 30, 64, 175;
   --primary-hover: #1e3a8a;
   --primary-glow: rgba(30, 64, 175, 0.3);
   --secondary: #64748b;
@@ -279,4 +280,11 @@ tr:hover td {
 @keyframes slideIn {
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
 }

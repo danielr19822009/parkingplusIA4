@@ -38,6 +38,16 @@ async function cargarVehiculosActivos() {
                     <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
                         <i class="fas fa-clock"></i> Ingreso: ${new Date(v.fecha_ingreso).toLocaleString()}
                     </p>
+                    ${v.todas_novedades ? `
+                    <div style="background: rgba(var(--primary-rgb), 0.05); border: 1px dashed var(--primary); color: var(--text-main); padding: 0.75rem; border-radius: 0.5rem; margin-top: 1rem; font-size: 0.8rem;">
+                        <p style="margin-bottom: 0.4rem; font-weight: 700; color: var(--primary); text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.05em;">
+                            <i class="fas fa-clipboard-list"></i> Novedades Registradas
+                        </p>
+                        <ul style="padding-left: 1.2rem; margin: 0; line-height: 1.4;">
+                            ${v.todas_novedades.split('|||').map(nov => `<li style="margin-bottom: 0.2rem;">${nov}</li>`).join('')}
+                        </ul>
+                    </div>
+                    ` : ''}
                 </div>
                 <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem;">
                     <button class="btn btn-outline" style="flex: 1; font-size: 0.8rem;" onclick="abrirModalNovedad(${v.id}, '${v.placa}')">
@@ -81,6 +91,7 @@ async function guardarNovedad() {
         if (res.ok) {
             alert('Novedad guardada correctamente');
             closeModal('modalNovedad');
+            cargarVehiculosActivos(); // Refrescar para ver la novedad en el card
         }
     } catch (e) { alert('Error al guardar novedad'); }
 }
