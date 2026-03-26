@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkingPlus IA4 - Sistema de Gestión</title>
+    <link rel="stylesheet" href="css/estilos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="index.html" class="logo">ParkingPlus IA4</a>
+            <div class="nav-actions">
+                <a href="pages/login.html" class="btn btn-outline">Iniciar Sesión</a>
+                <a href="pages/registro.html" class="btn btn-primary">Registrarse</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="tracking-container">
+            <div class="tracking-header">
+                <h1><i class="fa-solid fa-truck-fast"></i> Rastrea tu Vehículo</h1>
+                <p>Ingresa la placa del vehículo para ver su estado en el parqueadero</p>
+            </div>
+
+            <div class="tracking-search">
+                <label><i class="fa-solid fa-barcode"></i> Número de placa</label>
+                <p class="hint" style="font-size: 0.8rem; color: var(--text-muted);">Ingresa la placa del vehículo registrada en el parqueadero</p>
+                <div class="tracking-input-group">
+                    <input type="text" id="inputTracking" placeholder="Ej: ABC-1234" maxlength="8"
+                        oninput="this.value = this.value.toUpperCase()">
+                    <button class="btn btn-primary" onclick="window.location.href='pages/rastreo.html?placa=' + document.getElementById('inputTracking').value">
+                        <i class="fa-solid fa-magnifying-glass"></i> Rastrear
+                    </button>
+                </div>
+            </div>
+            
+            <div id="resultContainer"></div>
+        </section>
+    </main>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

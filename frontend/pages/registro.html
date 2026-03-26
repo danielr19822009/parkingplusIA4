@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - ParkingPlus IA4</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem 0;">
+    <div class="tracking-container" style="margin: 0; width: 100%; max-width: 500px;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <a href="../index.html" style="text-decoration: none; color: var(--primary); font-size: 1.5rem; font-weight: 700;">ParkingPlus IA4</a>
+            <h1 style="font-size: 1.25rem; margin-top: 1rem;">Crear una cuenta</h1>
+            <p style="color: var(--text-muted);">Completa tus datos para unirte al personal</p>
+        </div>
+
+        <form id="registroForm">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Tipo Doc.</label>
+                    <select id="tipo_documento" required>
+                        <option value="CC">Cédula Ciudadanía</option>
+                        <option value="CE">Cédula Extranjería</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Número Doc.</label>
+                    <input type="text" id="numero_documento" required>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Primer Nombre</label>
+                    <input type="text" id="primer_nombre" required>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Primer Apellido</label>
+                    <input type="text" id="primer_apellido" required>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Correo Electrónico</label>
+                <input type="email" id="direccion_correo" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Celular</label>
+                    <input type="text" id="numero_celular" required>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Rol / Perfil</label>
+                    <select id="PERFIL_USUARIO_id" required>
+                        <option value="1">Administrador</option>
+                        <option value="2">Coadministrador</option>
+                        <option value="3">Operador</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Contraseña</label>
+                <input type="password" id="clave" required minlength="6">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem;">Registrarse Ahora</button>
+        </form>
+
+        <div style="margin-top: 2rem; text-align: center; font-size: 0.9rem;">
+            <p>¿Ya tienes una cuenta? <a href="login.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Inicia Sesión</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registroForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = {
+                tipo_documento: document.getElementById('tipo_documento').value,
+                num_documento: document.getElementById('numero_documento').value,
+                nombres: document.getElementById('primer_nombre').value,
+                apellidos: document.getElementById('primer_apellido').value,
+                correo: document.getElementById('direccion_correo').value,
+                celular: document.getElementById('numero_celular').value,
+                rol: document.getElementById('PERFIL_USUARIO_id').value, // El selector tiene valores 1, 2, 3 pero mapearemos a nombres
+                password: document.getElementById('clave').value,
+                estado: 'Activo'
+            };
+
+            // Mapear valores numéricos a nombres de rol si es necesario
+            const roles = { "1": "Administrador", "2": "Coadministrador", "3": "Operador" };
+            formData.rol = roles[formData.rol] || formData.rol;
+
+            try {
+                const response = await fetch('/api/auth/registro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Registro exitoso. Ahora puedes iniciar sesión.');
+                    window.location.href = 'login.html';
+                } else {
+                    alert(data.mensaje || 'Error en el registro');
+                }
+            } catch (error) {
+                alert('Error al conectar con el servidor');
+            }
+        });
+    </script>
+</body>
+</html>

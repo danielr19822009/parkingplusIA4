@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - ParkingPlus IA4</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+    <div class="tracking-container" style="margin: 0; width: 100%; max-width: 400px;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <a href="../index.html" style="text-decoration: none; color: var(--primary); font-size: 1.5rem; font-weight: 700;">ParkingPlus IA4</a>
+            <h1 style="font-size: 1.25rem; margin-top: 1rem;">Bienvenido de nuevo</h1>
+            <p style="color: var(--text-muted);">Ingresa tus credenciales para acceder</p>
+        </div>
+
+        <form id="loginForm">
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Correo Electrónico</label>
+                <div style="position: relative;">
+                    <i class="fas fa-envelope" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                    <input type="email" id="correo" placeholder="ejemplo@correo.com" style="padding-left: 2.5rem;" required>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Contraseña</label>
+                <div style="position: relative;">
+                    <i class="fas fa-lock" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                    <input type="password" id="clave" placeholder="••••••••" style="padding-left: 2.5rem;" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem;">Ingresar al Sistema</button>
+        </form>
+
+        <div style="margin-top: 2rem; text-align: center; font-size: 0.9rem;">
+            <p>¿No tienes una cuenta? <a href="registro.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Regístrate aquí</a></p>
+            <div style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+                <a href="../index.html" style="color: var(--text-muted); text-decoration: none;"><i class="fas fa-arrow-left"></i> Volver al inicio</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const correo = document.getElementById('correo').value;
+            const password = document.getElementById('clave').value;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ correo, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('usuario', JSON.stringify(data.usuario));
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert(data.mensaje || 'Error en el inicio de sesión');
+                }
+            } catch (error) {
+                alert('Error al conectar con el servidor');
+            }
+        });
+    </script>
+</body>
+</html>

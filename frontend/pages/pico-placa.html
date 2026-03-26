@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión Pico y Placa - ParkingPlus IA4</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="dashboard.html" class="logo">ParkingPlus IA4</a>
+            <ul class="nav-links">
+                <li><a href="dashboard.html">Inicio</a></li>
+                <li><a href="pico-placa.html" style="color: var(--primary);">Pico y Placa</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container" style="margin-top: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h1>Configuración Pico y Placa</h1>
+            <button class="btn btn-primary" onclick="openModal('modalRegla')">
+                <i class="fas fa-plus"></i> Nueva Regla
+            </button>
+        </div>
+
+        <div class="card">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border); text-align: left;">
+                        <th style="padding: 1rem;">Tipo Vehículo</th>
+                        <th style="padding: 1rem;">Día Semana</th>
+                        <th style="padding: 1rem;">Dígitos Restringidos</th>
+                        <th style="padding: 1rem;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="listaReglas">
+                    <!-- Reglas dinámicas -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modal Nueva Regla -->
+    <div id="modalRegla" class="modal">
+        <div class="modal-content">
+            <h2>Agregar Regla de Restricción</h2>
+            <form id="formRegla" style="margin-top: 1rem;">
+                <div style="margin-bottom: 1rem;">
+                    <label>Tipo Vehículo</label>
+                    <select id="reglaTipo">
+                        <option value="Carro">Carro</option>
+                        <option value="Moto">Moto</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label>Día de la Semana</label>
+                    <select id="reglaDia">
+                        <option value="1">Lunes</option>
+                        <option value="2">Martes</option>
+                        <option value="3">Miércoles</option>
+                        <option value="4">Jueves</option>
+                        <option value="5">Viernes</option>
+                        <option value="6">Sábado</option>
+                        <option value="7">Domingo</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label>Dígitos (separados por coma)</label>
+                    <input type="text" id="reglaDigitos" placeholder="Ej: 1,2,3" required>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Guardar Regla</button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modalRegla')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const dias = ["", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+        
+        async function cargarReglas() {
+            try {
+                const res = await fetch('/api/picoplaca', {
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+                });
+                const reglas = await res.json();
+                const tbody = document.getElementById('listaReglas');
+                tbody.innerHTML = '';
+
+                reglas.forEach(r => {
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid var(--border)';
+                    tr.innerHTML = `
+                        <td style="padding: 1rem;">${r.tipo_vehiculo}</td>
+                        <td style="padding: 1rem;">${dias[r.dia_semana]}</td>
+                        <td style="padding: 1rem;"><span style="background: var(--bg-light); padding: 0.2rem 0.5rem; border-radius: 0.25rem;">${r.digitos}</span></td>
+                        <td style="padding: 1rem;">
+                            <button class="btn btn-outline" style="color: var(--danger); border-color: var(--danger);" onclick="eliminarRegla(${r.id})">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        document.getElementById('formRegla').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                tipo_vehiculo: document.getElementById('reglaTipo').value,
+                dia_semana: document.getElementById('reglaDia').value,
+                digitos: document.getElementById('reglaDigitos').value
+            };
+
+            try {
+                const res = await fetch('/api/picoplaca', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    alert('Regla agregada');
+                    closeModal('modalRegla');
+                    cargarReglas();
+                    e.target.reset();
+                }
+            } catch (e) { alert('Error al guardar'); }
+        });
+
+        async function eliminarRegla(id) {
+            if (!confirm('¿Eliminar esta regla?')) return;
+            try {
+                const res = await fetch(`/api/picoplaca/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+                });
+                if (res.ok) { cargarReglas(); }
+            } catch (e) { alert('Error al eliminar'); }
+        }
+
+        document.addEventListener('DOMContentLoaded', cargarReglas);
+    </script>
+</body>
+</html>

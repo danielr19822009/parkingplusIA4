@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rastreo de Vehículo - ParkingPlus IA4</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="../index.html" class="logo">ParkingPlus IA4</a>
+            <div class="nav-actions">
+                <a href="login.html" class="btn btn-outline">Iniciar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="tracking-container">
+            <div class="tracking-header">
+                <h1><i class="fa-solid fa-truck-fast"></i> Estado de tu Vehículo</h1>
+                <p id="placaDisplay">Buscando placa...</p>
+            </div>
+
+            <div id="resultContainer">
+                <!-- El contenido se cargará dinámicamente -->
+                <div style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary);"></i>
+                    <p>Cargando información...</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem; text-align: center;">
+                <a href="../index.html" class="btn btn-outline">Realizar otra búsqueda</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const placa = params.get('placa');
+            if (placa) {
+                document.getElementById('placaDisplay').textContent = "Placa: " + placa.toUpperCase();
+                rastrearVehiculo(placa);
+            } else {
+                window.location.href = '../index.html';
+            }
+        });
+
+        async function rastrearVehiculo(placa) {
+            const container = document.getElementById('resultContainer');
+            try {
+                const response = await fetch(`/api/registros/rastreo/${placa}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    const ingreso = new Date(data.fecha_ingreso);
+                    const ahora = new Date();
+                    const diffMs = ahora - ingreso;
+                    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+                    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+                    container.innerHTML = `
+                        <div class="result-card">
+                            <div style="display: flex; gap: 1rem; align-items: start; margin-bottom: 1.5rem;">
+                                <div style="background: var(--primary); color: white; padding: 1rem; border-radius: 0.5rem;">
+                                    <i class="fas fa-car fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h2 style="font-size: 1.25rem;">${data.marca || 'Marca'} ${data.modelo || 'Modelo'}</h2>
+                                    <p style="color: var(--text-muted);">Color: ${data.color || 'N/A'}</p>
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div style="background: white; padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border);">
+                                    <p style="font-size: 0.8rem; color: var(--text-muted);">Celda Asignada</p>
+                                    <p style="font-weight: 600; font-size: 1.1rem; color: var(--primary);">${data.celda_numero}</p>
+                                </div>
+                                <div style="background: white; padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border);">
+                                    <p style="font-size: 0.8rem; color: var(--text-muted);">Estado</p>
+                                    <p style="font-weight: 600; font-size: 1.1rem; color: var(--success);">ESTACIONADO</p>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 1.5rem; background: var(--primary); color: white; padding: 1rem; border-radius: 0.5rem; text-align: center;">
+                                <p style="font-size: 0.9rem; opacity: 0.9;">Tiempo en parqueadero</p>
+                                <p style="font-size: 1.5rem; font-weight: 700;">${diffHrs}h ${diffMins}min</p>
+                                <p style="font-size: 0.8rem; opacity: 0.8; margin-top: 0.25rem;">Ingreso: ${ingreso.toLocaleString()}</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 2rem;">
+                            <i class="fas fa-exclamation-circle fa-2x" style="color: var(--danger);"></i>
+                            <p style="margin-top: 1rem; font-weight: 500;">${data.mensaje || 'No se encontró el vehículo'}</p>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">Verifica que la placa sea correcta y que el vehículo esté dentro del parqueadero.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                container.innerHTML = `<p style="color: var(--danger); text-align: center;">Error al conectar con el servidor.</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
