@@ -95,6 +95,37 @@ class RegistroModelo {
     const [[{ fuera }]] = await pool.query("SELECT COUNT(*) as fuera FROM registros_salida");
     return { dentro, fuera };
   }
+  static async obtenerFuera() {
+    const [filas] = await pool.query(`
+      SELECT rs.*, v.placa, v.marca, v.color, c.numero as celda_numero,
+      us.nombres as usuario_nombre
+      FROM registros_salida rs
+      JOIN vehicles v ON rs.vehiculo_id = v.id
+      JOIN celdas c ON rs.celda_id = c.id
+      LEFT JOIN users us ON rs.usuario_salida = us.id
+      ORDER BY rs.fecha_salida DESC
+    `);
+    return filas;
+  }
+
+  static async obtenerHistorial() {
+    const [filas] = await pool.query(`
+      SELECT 'Ingreso' as tipo, ri.id, ri.placa, ri.fecha_ingreso as fecha, ri.hora_ingreso as hora, 
+             c.numero as celda, u.nombres as usuario, ri.estado
+      FROM registros_ingreso ri
+      JOIN celdas c ON ri.celda_id = c.id
+      JOIN users u ON ri.usuario_ingreso = u.id
+      UNION ALL
+      SELECT 'Salida' as tipo, rs.id, v.placa, rs.fecha_salida as fecha, rs.hora_salida as hora,
+             c.numero as celda, us.nombres as usuario, 'Fuera' as estado
+      FROM registros_salida rs
+      JOIN vehicles v ON rs.vehiculo_id = v.id
+      JOIN celdas c ON rs.celda_id = c.id
+      JOIN users us ON rs.usuario_salida = us.id
+      ORDER BY fecha DESC, hora DESC
+    `);
+    return filas;
+  }
 }
 
 module.exports = RegistroModelo;

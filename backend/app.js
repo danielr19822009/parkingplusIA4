@@ -20,6 +20,7 @@ app.use('/api/novedades', require('./routes/novedadRutas'));
 app.use('/api/picoplaca', require('./routes/picoPlacaRutas'));
 app.use('/api/celdas', require('./routes/celdaRutas'));
 app.use('/api/clientes', require('./routes/clienteRutas'));
+app.use('/api/reportes', require('./routes/reporteRutas'));
 
 // Ruta principal para el index
 app.get('/', (req, res) => {
