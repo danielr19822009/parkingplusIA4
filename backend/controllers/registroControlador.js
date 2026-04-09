@@ -72,7 +72,7 @@ class RegistroControlador {
       const { placa } = req.params;
       const registro = await RegistroModelo.buscarPorPlacaActiva(placa);
       if (!registro) {
-        return res.status(404).json({ mensaje: 'Vehículo no encontrado dentro del parqueadero' });
+        return res.status(404).json({ mensaje: 'Vehículo no encontrado dentro del parqueadero. ¡Hazte PRO para desbloquear este servicio!' });
       }
       res.json(registro);
     } catch (error) {

@@ -121,18 +121,30 @@ document.getElementById('formCelda').addEventListener('submit', async (e) => {
 
         const respData = await res.json();
         if (res.ok) {
+            Swal.fire('¡Guardado!', 'La celda se guardó correctamente.', 'success');
             cerrarModalCelda();
             cargarCeldas();
         } else {
-            alert(respData.mensaje || 'Error al guardar la celda');
+            Swal.fire('Error', respData.mensaje || 'Error al guardar la celda', 'error');
         }
     } catch (e) {
-        alert('Error de conexión');
+        Swal.fire('Error', 'Error de conexión', 'error');
     }
 });
 
 async function eliminarCelda(id) {
-    if (!confirm('¿Estás seguro de que deseas eliminar esta celda?')) return;
+    const result = await Swal.fire({
+        title: '¿Eliminar Celda?',
+        text: '¿Estás seguro de que deseas eliminar esta celda? Esta acción no se puede deshacer.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if (!result.isConfirmed) return;
     
     const token = localStorage.getItem('token');
     try {
@@ -142,13 +154,14 @@ async function eliminarCelda(id) {
         });
 
         if (res.ok) {
+            Swal.fire('Eliminada', 'La celda ha sido eliminada correctamente.', 'success');
             cargarCeldas();
         } else {
             const data = await res.json();
-            alert(data.mensaje || 'Error al eliminar');
+            Swal.fire('Error', data.mensaje || 'Error al eliminar', 'error');
         }
     } catch (e) {
-        alert('Error de conexión');
+        Swal.fire('Error', 'Error de conexión', 'error');
     }
 }
 

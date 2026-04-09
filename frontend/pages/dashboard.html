@@ -6,6 +6,8 @@
     <title>Dashboard - ParkingPlus IA4</title>
     <link rel="stylesheet" href="../css/estilos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .stats-grid {
             display: grid;
@@ -83,14 +85,35 @@
             </button>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h4>Vehículos Adentro</h4>
-                <p id="statsDentro">0</p>
+        <div class="dashboard-upper" style="display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem;">
+            <div class="stats-grid" style="flex: 1; min-width: 300px; margin-bottom: 0;">
+                <div class="stat-card">
+                    <h4>Vehículos Adentro</h4>
+                    <p id="statsDentro">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Vehículos que Salieron</h4>
+                    <p id="statsFuera">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Usuarios Sistema</h4>
+                    <p id="statsUsuarios">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Clientes Registrados</h4>
+                    <p id="statsClientes">0</p>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--success);">
+                    <h4>Celdas Disponibles</h4>
+                    <p id="statsCeldas">0</p>
+                </div>
             </div>
-            <div class="stat-card">
-                <h4>Vehículos que Salieron</h4>
-                <p id="statsFuera">0</p>
+
+            <div class="stat-card" style="flex: 0 0 350px; min-width: 300px; margin-bottom: 0; display: flex; flex-direction: column; justify-content: center;">
+                <h4 style="margin-bottom: 1rem;">Ocupación Semanal</h4>
+                <div style="height: 180px; width: 100%;">
+                    <canvas id="ocupacionChart"></canvas>
+                </div>
             </div>
         </div>
 

@@ -6,6 +6,7 @@
     <title>Gestión Pico y Placa - ParkingPlus IA4</title>
     <link rel="stylesheet" href="../css/estilos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -130,23 +131,41 @@
                     body: JSON.stringify(data)
                 });
                 if (res.ok) {
-                    alert('Regla agregada');
+                    Swal.fire('Guardado', 'La regla se ha agregado correctamente.', 'success');
                     closeModal('modalRegla');
                     cargarReglas();
                     e.target.reset();
+                } else {
+                    const error = await res.json();
+                    Swal.fire('Error', error.mensaje || 'Error al guardar', 'error');
                 }
-            } catch (e) { alert('Error al guardar'); }
+            } catch (e) { Swal.fire('Error', 'Error al conectar con el servidor', 'error'); }
         });
 
         async function eliminarRegla(id) {
-            if (!confirm('¿Eliminar esta regla?')) return;
+            const result = await Swal.fire({
+                title: '¿Eliminar Regla?',
+                text: '¿Estás seguro de que deseas eliminar esta restricción?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (!result.isConfirmed) return;
+
             try {
                 const res = await fetch(`/api/picoplaca/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
                 });
-                if (res.ok) { cargarReglas(); }
-            } catch (e) { alert('Error al eliminar'); }
+                if (res.ok) { 
+                    Swal.fire('Eliminado', 'La regla ha sido eliminada.', 'success');
+                    cargarReglas(); 
+                }
+            } catch (e) { Swal.fire('Error', 'Error al eliminar', 'error'); }
         }
 
         document.addEventListener('DOMContentLoaded', cargarReglas);

@@ -1,12 +1,89 @@
+let ocupacionChart = null;
+
 async function cargarEstadisticas() {
     try {
         const res = await fetch('/api/registros/estadisticas', {
             headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
         });
         const data = await res.json();
-        document.getElementById('statsDentro').textContent = data.dentro;
-        document.getElementById('statsFuera').textContent = data.fuera;
+        
+        document.getElementById('statsDentro').textContent = data.dentro || 0;
+        document.getElementById('statsFuera').textContent = data.fuera || 0;
+        document.getElementById('statsUsuarios').textContent = data.totalUsuarios || 0;
+        document.getElementById('statsClientes').textContent = data.totalClientes || 0;
+        document.getElementById('statsCeldas').textContent = data.celdasDisponibles || 0;
+
+        // Renderizar/Actualizar Gráfico
+        renderizarGrafico(data.ocupacionPorDia, data.totalCeldas);
     } catch (e) { console.error(e); }
+}
+
+function renderizarGrafico(datos, totalCeldas) {
+    const ctx = document.getElementById('ocupacionChart').getContext('2d');
+    
+    // Preparar etiquetas (fechas) y valores
+    const labels = datos.map(d => {
+        const date = new Date(d.fecha);
+        return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+    });
+    const values = datos.map(d => d.cantidad);
+    const capacityData = labels.map(() => totalCeldas);
+
+    if (ocupacionChart) {
+        ocupacionChart.data.labels = labels;
+        ocupacionChart.data.datasets[0].data = values;
+        ocupacionChart.data.datasets[1].data = capacityData;
+        ocupacionChart.update();
+    } else {
+        ocupacionChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Ingresos Diarios',
+                        data: values,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#2563eb',
+                        pointRadius: 5
+                    },
+                    {
+                        label: 'Capacidad Total',
+                        data: capacityData,
+                        borderColor: '#ef4444',
+                        borderDash: [5, 5],
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        display: true, 
+                        position: 'top',
+                        labels: { boxWidth: 10, font: { size: 10 } }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, font: { size: 10 } },
+                    },
+                    x: {
+                        ticks: { font: { size: 10 } }
+                    }
+                }
+            }
+        });
+    }
 }
 
 async function cargarVehiculosActivos() {
@@ -77,7 +154,9 @@ async function guardarNovedad() {
     const registroId = document.getElementById('novedadRegistroId').value;
     const descripcion = document.getElementById('novedadInput').value;
 
-    if (!descripcion) return alert('Ingrese la descripción de la novedad');
+    if (!descripcion) {
+        return Swal.fire('Atención', 'Ingrese la descripción de la novedad', 'warning');
+    }
 
     try {
         const res = await fetch('/api/novedades', {
@@ -89,26 +168,42 @@ async function guardarNovedad() {
             body: JSON.stringify({ REGISTRO_id: registroId, descripcion })
         });
         if (res.ok) {
-            alert('Novedad guardada correctamente');
+            Swal.fire('Éxito', 'Novedad guardada correctamente', 'success');
             closeModal('modalNovedad');
-            cargarVehiculosActivos(); // Refrescar para ver la novedad en el card
+            cargarVehiculosActivos(); 
         }
-    } catch (e) { alert('Error al guardar novedad'); }
+    } catch (e) { 
+        Swal.fire('Error', 'Error al guardar novedad', 'error'); 
+    }
 }
 
 async function registrarSalida(id) {
-    if (!confirm('¿Desea registrar la salida de este vehículo?')) return;
+    const result = await Swal.fire({
+        title: '¿Registrar Salida?',
+        text: '¿Desea registrar la salida de este vehículo?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, registrar',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
         const res = await fetch(`/api/registros/salida/${id}`, {
             method: 'PUT',
             headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
         });
         if (res.ok) {
-            alert('Salida registrada');
+            Swal.fire('Registrada', 'Salida registrada correctamente', 'success');
             cargarEstadisticas();
             cargarVehiculosActivos();
         }
-    } catch (e) { alert('Error al registrar salida'); }
+    } catch (e) { 
+        Swal.fire('Error', 'Error al registrar salida', 'error'); 
+    }
 }
 
 document.getElementById('formIngreso').addEventListener('submit', async (e) => {
@@ -132,15 +227,17 @@ document.getElementById('formIngreso').addEventListener('submit', async (e) => {
         });
         const respData = await res.json();
         if (res.ok) {
-            alert('Ingreso exitoso');
+            Swal.fire('¡Ingreso Exitoso!', 'El vehículo se registró correctamente.', 'success');
             closeModal('modalIngreso');
             cargarEstadisticas();
             cargarVehiculosActivos();
             e.target.reset();
         } else {
-            alert(respData.mensaje || 'Error al registrar ingreso');
+            Swal.fire('No se pudo registrar', respData.mensaje || 'Error al registrar ingreso', 'error');
         }
-    } catch (e) { alert('Error al conectar con el servidor'); }
+    } catch (e) { 
+        Swal.fire('Error', 'Error al conectar con el servidor', 'error'); 
+    }
 });
 
 // Inicializar

@@ -4,10 +4,10 @@ class ReporteModelo {
   static async obtenerTodos() {
     try {
       const [rows] = await pool.query(`
-        SELECT r.*, c.numero as celda_numero, u.primer_nombre as usuario_nombre
+        SELECT r.*, c.numero as celda_numero, u.nombres as usuario_nombre
         FROM reportes r
         LEFT JOIN celdas c ON r.celda_id = c.id
-        LEFT JOIN users u ON r.usuario_reporte = u.id_usuario
+        LEFT JOIN users u ON r.usuario_reporte = u.id
         ORDER BY r.created_at DESC
       `);
       return rows;

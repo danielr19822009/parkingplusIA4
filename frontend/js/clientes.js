@@ -103,29 +103,58 @@ document.getElementById('formCliente').addEventListener('submit', async (e) => {
             body: JSON.stringify(data)
         });
 
+    try {
+        const res = await fetch(url, {
+            method,
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify(data)
+        });
+
         if (res.ok) {
+            Swal.fire('Éxito', 'Cliente guardado correctamente', 'success');
             cerrarModalCliente();
             cargarClientes();
         } else {
             const err = await res.json();
-            alert(err.mensaje || 'Error al guardar');
+            Swal.fire('Error', err.mensaje || 'Error al guardar', 'error');
         }
     } catch (e) {
-        alert('Error de conexión');
+        Swal.fire('Error', 'Error de conexión', 'error');
     }
 });
 
 async function eliminarCliente(id) {
-    if (!confirm('¿Seguro que deseas eliminar este cliente?')) return;
+    const result = await Swal.fire({
+        title: '¿Eliminar Cliente?',
+        text: '¿Seguro que deseas eliminar este cliente? Esta acción no se puede deshacer.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if (!result.isConfirmed) return;
+    
     const token = localStorage.getItem('token');
     try {
         const res = await fetch(`/api/clientes/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': 'Bearer ' + token }
         });
-        if (res.ok) cargarClientes();
+        if (res.ok) {
+            Swal.fire('Eliminado', 'El cliente ha sido eliminado.', 'success');
+            cargarClientes();
+        } else {
+            const err = await res.json();
+            Swal.fire('Error', err.mensaje || 'Error al eliminar', 'error');
+        }
     } catch (e) {
-        alert('Error de conexión');
+        Swal.fire('Error', 'Error de conexión', 'error');
     }
 }
 

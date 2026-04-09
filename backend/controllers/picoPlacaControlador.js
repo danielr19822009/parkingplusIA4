@@ -9,9 +9,22 @@ class PicoPlacaControlador {
   });
 
   static crear = asyncHandler(async (req, res, next) => {
-    if (!req.body.dia_semana || !req.body.digitos) {
-      return next(new ErrorApp('Faltan datos requeridos (dia_semana, digitos)', 400));
+    const { tipo_vehiculo, dia_semana, digitos } = req.body;
+    if (!dia_semana || !digitos || !tipo_vehiculo) {
+      return next(new ErrorApp('Faltan datos requeridos (tipo_vehiculo, dia_semana, digitos)', 400));
     }
+
+    // VALIDACIÓN: No permitir duplicados para el mismo día y tipo de vehículo
+    const reglasExistentes = await PicoPlacaModelo.obtenerTodos();
+    const conflicto = reglasExistentes.find(r => 
+      r.tipo_vehiculo === tipo_vehiculo && 
+      String(r.dia_semana) === String(dia_semana)
+    );
+
+    if (conflicto) {
+      return next(new ErrorApp(`Ya existe una regla para ${tipo_vehiculo} el día ${dia_semana}. Modifíquela o elimínela.`, 400));
+    }
+
     const id = await PicoPlacaModelo.crear(req.body);
     res.status(201).json({ mensaje: 'Regla creada', id });
   });

@@ -93,7 +93,30 @@ class RegistroModelo {
   static async obtenerEstadisticas() {
     const [[{ dentro }]] = await pool.query("SELECT COUNT(*) as dentro FROM registros_ingreso WHERE estado = 'Dentro'");
     const [[{ fuera }]] = await pool.query("SELECT COUNT(*) as fuera FROM registros_salida");
-    return { dentro, fuera };
+    const [[{ totalUsuarios }]] = await pool.query("SELECT COUNT(*) as totalUsuarios FROM users");
+    const [[{ totalClientes }]] = await pool.query("SELECT COUNT(*) as totalClientes FROM clientes");
+    const [[{ celdasDisponibles }]] = await pool.query("SELECT COUNT(*) as celdasDisponibles FROM celdas WHERE estado = 'disponible'");
+    const [[{ totalCeldas }]] = await pool.query("SELECT COUNT(*) as totalCeldas FROM celdas");
+
+    // Para el gráfico, obtendremos ingresos por día de los últimos 7 días
+    // Usamos registros_ingreso para ver la tendencia de actividad
+    const [ocupacionPorDia] = await pool.query(`
+      SELECT DATE(fecha_ingreso) as fecha, COUNT(*) as cantidad
+      FROM registros_ingreso
+      WHERE fecha_ingreso >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+      GROUP BY DATE(fecha_ingreso)
+      ORDER BY fecha
+    `);
+
+    return { 
+      dentro, 
+      fuera, 
+      totalUsuarios,
+      totalClientes,
+      celdasDisponibles, 
+      totalCeldas,
+      ocupacionPorDia 
+    };
   }
   static async obtenerFuera() {
     const [filas] = await pool.query(`

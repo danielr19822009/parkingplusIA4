@@ -6,6 +6,7 @@
     <title>Registro - ParkingPlus IA4</title>
     <link rel="stylesheet" href="../css/estilos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem 0;">
     <div class="tracking-container" style="margin: 0; width: 100%; max-width: 500px;">
@@ -103,13 +104,18 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    alert('Registro exitoso. Ahora puedes iniciar sesión.');
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '¡Registro Exitoso!',
+                        text: 'Tu cuenta ha sido creada. Ahora puedes iniciar sesión.',
+                        confirmButtonText: 'Ir al Login'
+                    });
                     window.location.href = 'login.html';
                 } else {
-                    alert(data.mensaje || 'Error en el registro');
+                    Swal.fire('Error', data.mensaje || 'Error en el registro', 'error');
                 }
             } catch (error) {
-                alert('Error al conectar con el servidor');
+                Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
             }
         });
     </script>

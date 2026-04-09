@@ -6,6 +6,7 @@
     <title>Iniciar Sesión - ParkingPlus IA4</title>
     <link rel="stylesheet" href="../css/estilos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
     <div class="tracking-container" style="margin: 0; width: 100%; max-width: 400px;">
@@ -63,10 +64,10 @@
                     localStorage.setItem('usuario', JSON.stringify(data.usuario));
                     window.location.href = 'dashboard.html';
                 } else {
-                    alert(data.mensaje || 'Error en el inicio de sesión');
+                    Swal.fire('Error de Acceso', data.mensaje || 'Credenciales incorrectas', 'error');
                 }
             } catch (error) {
-                alert('Error al conectar con el servidor');
+                Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
             }
         });
     </script>

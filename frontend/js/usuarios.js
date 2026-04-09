@@ -95,10 +95,10 @@ async function editarUsuario(id) {
             
             document.getElementById('modalEditar').style.display = 'flex';
         } else {
-            alert(u.mensaje || 'Error al obtener datos');
+            Swal.fire('Error', u.mensaje || 'Error al obtener datos', 'error');
         }
     } catch (e) {
-        alert('Error de conexión');
+        Swal.fire('Error', 'Error de conexión', 'error');
     }
 }
 
@@ -132,18 +132,30 @@ document.getElementById('formEditar').addEventListener('submit', async (e) => {
 
         const data = await res.json();
         if (res.ok) {
+            Swal.fire('Actualizado', 'Usuario actualizado correctamente', 'success');
             closeModalEditar();
             cargarUsuarios();
         } else {
-            alert(data.mensaje || 'Error al actualizar');
+            Swal.fire('Error', data.mensaje || 'Error al actualizar', 'error');
         }
     } catch (e) {
-        alert('Error de conexión');
+        Swal.fire('Error', 'Error de conexión', 'error');
     }
 });
 
 async function eliminarUsuario(id) {
-    if (!confirm('¿Estás seguro de que deseas eliminar este usuario?')) return;
+    const result = await Swal.fire({
+        title: '¿Eliminar Usuario?',
+        text: '¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if (!result.isConfirmed) return;
     
     const token = localStorage.getItem('token');
     try {
@@ -153,13 +165,14 @@ async function eliminarUsuario(id) {
         });
 
         if (res.ok) {
+            Swal.fire('Eliminado', 'El usuario ha sido eliminado.', 'success');
             cargarUsuarios();
         } else {
             const data = await res.json();
-            alert(data.mensaje || 'Error al eliminar');
+            Swal.fire('Error', data.mensaje || 'Error al eliminar', 'error');
         }
     } catch (e) {
-        alert('Error de conexión');
+        Swal.fire('Error', 'Error de conexión', 'error');
     }
 }
 
