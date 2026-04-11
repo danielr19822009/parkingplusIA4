@@ -70,6 +70,7 @@
                 <button class="btn btn-outline" id="userName">Bienvenido: ... <i class="fas fa-user-circle"></i></button>
                 <div class="dropdown-content">
                     <a href="perfil.html">Editar Perfil</a>
+                    <a href="#" onclick="mostrarModalPassword()">Cambiar Contraseña</a>
                     <a href="#" onclick="cambiarUsuario()">Cambiar Usuario</a>
                     <a href="#" onclick="cerrarSesion()" style="color: var(--danger);">Cerrar Sesión</a>
                 </div>
@@ -84,6 +85,7 @@
                 <i class="fas fa-plus"></i> Registrar Ingreso
             </button>
         </div>
+
 
         <div class="dashboard-upper" style="display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem;">
             <div class="stats-grid" style="flex: 1; min-width: 300px; margin-bottom: 0;">
@@ -118,6 +120,28 @@
         </div>
 
         <h2>Vehículos en Patio</h2>
+        
+        <!-- Filtros de Búsqueda -->
+        <div class="card" style="margin-bottom: 2rem; padding: 1rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                <div>
+                    <label style="font-size: 0.8rem; color: var(--text-muted);">Filtrar por Color</label>
+                    <input type="text" id="filterColor" placeholder="Ej: Rojo" class="swal2-input" style="margin: 0; width: 100%; height: 35px; font-size: 0.9rem;" oninput="filtrarVehiculos()">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; color: var(--text-muted);">Filtrar por Modelo</label>
+                    <input type="text" id="filterModelo" placeholder="Ej: 2023" class="swal2-input" style="margin: 0; width: 100%; height: 35px; font-size: 0.9rem;" oninput="filtrarVehiculos()">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; color: var(--text-muted);">Tipo de Vehículo</label>
+                    <select id="filterTipo" class="swal2-input" style="margin: 0; width: 100%; height: 35px; font-size: 0.9rem;" onchange="filtrarVehiculos()">
+                        <option value="">Todos</option>
+                        <option value="Carro">Carros</option>
+                        <option value="Moto">Motos</option>
+                    </select>
+                </div>
+            </div>
+        </div>
         <div id="dashboardGrid" class="dashboard-grid">
             <!-- Tarjetas de vehículos se cargarán aquí -->
         </div>
@@ -144,7 +168,9 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                     <div>
                         <label>Marca</label>
-                        <input type="text" id="ingresoMarca">
+                        <select id="ingresoMarca" required>
+                            <option value="">Cargando marcas...</option>
+                        </select>
                     </div>
                     <div>
                         <label>Color</label>
@@ -152,8 +178,14 @@
                     </div>
                 </div>
                 <div style="margin-bottom: 1rem;">
-                    <label>Celda (Opcional - Id)</label>
-                    <input type="number" id="ingresoCelda" value="1">
+                    <label>Modelo</label>
+                    <input type="text" id="ingresoModelo" placeholder="Ej: 2024">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label>Celda (Solo Disponibles)</label>
+                    <select id="ingresoCelda" required>
+                        <option value="">Cargando celdas...</option>
+                    </select>
                 </div>
                 <div style="display: flex; gap: 1rem; margin-top: 2rem;">
                     <button type="submit" class="btn btn-primary" style="flex: 1;">Registrar Entrada</button>

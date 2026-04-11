@@ -33,6 +33,11 @@ class CeldaModelo {
     const [resultado] = await pool.query('DELETE FROM celdas WHERE id = ?', [id]);
     return resultado.affectedRows;
   }
+
+  static async obtenerDisponibles() {
+    const [filas] = await pool.query("SELECT * FROM celdas WHERE LOWER(estado) = 'disponible' ORDER BY numero");
+    return filas;
+  }
 }
 
 module.exports = CeldaModelo;

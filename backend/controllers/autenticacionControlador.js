@@ -84,6 +84,30 @@ class AutenticacionControlador {
     }
     res.json({ mensaje: 'Usuario eliminado correctamente' });
   });
+
+  static cambiarPassword = asyncHandler(async (req, res, next) => {
+    const { passwordActual, passwordNueva, verificarPassword } = req.body;
+    const usuarioId = req.usuario.id;
+
+    if (!passwordActual || !passwordNueva || !verificarPassword) {
+      return next(new ErrorApp('Todos los campos son obligatorios', 400));
+    }
+
+    if (passwordNueva !== verificarPassword) {
+      return next(new ErrorApp('La nueva contraseña y su verificación no coinciden', 400));
+    }
+
+    const passwordHashActual = await UsuarioModelo.obtenerPasswordPorId(usuarioId);
+    
+    if (!passwordHashActual || !(await bcrypt.compare(passwordActual, passwordHashActual))) {
+      return next(new ErrorApp('La contraseña actual es incorrecta', 401));
+    }
+
+    const nuevoHash = await bcrypt.hash(passwordNueva, 10);
+    await UsuarioModelo.actualizarPassword(usuarioId, nuevoHash);
+
+    res.json({ mensaje: 'Contraseña actualizada exitosamente' });
+  });
 }
 
 module.exports = AutenticacionControlador;

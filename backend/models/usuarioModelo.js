@@ -55,9 +55,17 @@ class UsuarioModelo {
     return resultado.affectedRows;
   }
 
-  static async eliminar(id) {
-    const [resultado] = await pool.query('DELETE FROM users WHERE id = ?', [id]);
+  static async actualizarPassword(id, nuevaPassword) {
+    const [resultado] = await pool.query(
+      'UPDATE users SET password = ? WHERE id = ?',
+      [nuevaPassword, id]
+    );
     return resultado.affectedRows;
+  }
+
+  static async obtenerPasswordPorId(id) {
+    const [filas] = await pool.query('SELECT password FROM users WHERE id = ?', [id]);
+    return filas[0]?.password;
   }
 }
 

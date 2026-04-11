@@ -6,6 +6,7 @@ const checkRol = require('../middleware/checkRol');
 
 // Solo administradores y coadministradores gestionan celdas
 router.get('/', auth, CeldaControlador.obtenerTodas);
+router.get('/disponibles', auth, CeldaControlador.obtenerDisponibles);
 router.get('/:id', auth, CeldaControlador.obtenerPorId);
 router.post('/', auth, checkRol('Administrador', 'admin', 'Coadministrador', 'coadministrador'), CeldaControlador.crear);
 router.put('/:id', auth, checkRol('Administrador', 'admin', 'Coadministrador', 'coadministrador'), CeldaControlador.actualizar);

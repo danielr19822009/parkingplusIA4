@@ -12,5 +12,6 @@ router.get('/usuarios', auth, checkRol('Administrador', 'admin'), AutenticacionC
 router.get('/usuarios/:id', auth, checkRol('Administrador', 'admin'), AutenticacionControlador.obtenerUsuario);
 router.put('/usuarios/:id', auth, checkRol('Administrador', 'admin'), AutenticacionControlador.actualizarUsuario);
 router.delete('/usuarios/:id', auth, checkRol('Administrador', 'admin'), AutenticacionControlador.eliminarUsuario);
+router.put('/cambiar-password', auth, AutenticacionControlador.cambiarPassword);
 
 module.exports = router;

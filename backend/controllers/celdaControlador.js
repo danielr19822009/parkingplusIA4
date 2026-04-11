@@ -43,6 +43,11 @@ class CeldaControlador {
     }
     res.json({ mensaje: 'Celda eliminada correctamente' });
   });
+
+  static obtenerDisponibles = asyncHandler(async (req, res, next) => {
+    const celdas = await CeldaModelo.obtenerDisponibles();
+    res.json(celdas);
+  });
 }
 
 module.exports = CeldaControlador;
